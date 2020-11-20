@@ -1,0 +1,36 @@
+---
+- name: To install packages on tag2
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - httpd
+    - mod_ssl
+    - php
+    - firewalld
+
+- name: To start apache service and add at boot 
+  service: 
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - httpd
+    - firewalld
+
+- name: To HTTP port TCP 80 and HTTPS port TCP 443
+  firewalld:
+    port: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  loop:
+    - 80/tcp
+    - 443/tcp
+
+- name: To check if file content is changed 
+  template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+  notify: restart_apache
+    
